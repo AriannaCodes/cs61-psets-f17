@@ -78,6 +78,7 @@ void m61_getstatistics(struct m61_statistics* stats) {
     // Stub: set all statistics to enormous numbers
     memset(stats, 255, sizeof(struct m61_statistics));
     // Your code here.
+    
 }
 
 

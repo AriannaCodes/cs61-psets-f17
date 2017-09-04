@@ -37,6 +37,13 @@ struct m61_statistics {
     char* heap_max;                     // largest allocated addr
 };
 
+// m61_allocation
+// 		Structure tracking an allocation.
+struct m61_allocation {
+	unsigned long long allocation_size;
+	char* allocation_value;
+};
+
 /// m61_getstatistics(stats)
 ///    Store the current memory statistics in `*stats`.
 void m61_getstatistics(struct m61_statistics* stats);
