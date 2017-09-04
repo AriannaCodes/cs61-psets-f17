@@ -6,6 +6,15 @@
 #include <inttypes.h>
 #include <assert.h>
 
+unsigned long long malloc_num = 0;
+unsigned long long malloc_size = 0;
+unsigned long long free_num = 0;
+unsigned long long free_size = 0;
+unsigned long long fail_num = 0;
+unsigned long long fail_size = 0;
+char* heap_min;
+char* heap_max;
+
 /// m61_malloc(sz, file, line)
 ///    Return a pointer to `sz` bytes of newly-allocated dynamic memory.
 ///    The memory is not initialized. If `sz == 0`, then m61_malloc may
@@ -24,8 +33,24 @@ void* m61_malloc(size_t sz, const char* file, int line) {
     // fill struct for holding metadata and value
     allocation->size = sz;
     allocation->payload = base_malloc(sz + sizeof(size_t));
+    // ensure that base_malloc worked
+    if (allocation->payload == NULL) {
+        fail_num++;
+        fail_size += sz;
+    }
+    else {
+        malloc_num++;
+        malloc_size += sz;
+        // update statistics
+        if (heap_min == NULL || allocation->payload < heap_min) {
+            heap_min = allocation->payload;
+        }
+        if (heap_max == NULL || allocation->payload < heap_max) {
+            heap_max = allocation->payload;
+        }
+    }
     // return pointer to value
-    return allocation->size + sizeof(size_t);
+    return allocation->payload + sizeof(size_t);
 }
 
 
@@ -37,7 +62,13 @@ void* m61_malloc(size_t sz, const char* file, int line) {
 
 void m61_free(void *ptr, const char *file, int line) {
     (void) file, (void) line;   // avoid uninitialized variable warnings
+    // get size of memory
+    unsigned long long size = &(ptr - sizeof(size_t));
+    // call base_free
     base_free(ptr - sizeof(size_t));
+    // update statistics
+    free_num++;
+    free_size -= size;
 }
 
 
@@ -86,8 +117,16 @@ void* m61_calloc(size_t nmemb, size_t sz, const char* file, int line) {
 void m61_getstatistics(struct m61_statistics* stats) {
     // Stub: set all statistics to enormous numbers
     memset(stats, 255, sizeof(struct m61_statistics));
-    // Your code here.
-
+    // set statistics within struct
+    stats->nactive = malloc_num - free_num;
+    stats->active_size = malloc_size - free_size;
+    stats->ntotal = malloc_num;
+    stats->total_size = malloc_size;
+    stats->nfail = fail_num;
+    stats->fail_size = fail_size;
+    stats->heap_min = heap_min;
+    stats->heap_max = heap_max;
+    return;
 }
 
 
