@@ -3,8 +3,7 @@ Authors and collaborators
 
 Students
 --------
-(List your team members and describe in a couple words how you divided the
-work.)
+Arianna Benson
 
 
 Collaborators
