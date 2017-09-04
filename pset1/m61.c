@@ -14,8 +14,18 @@
 
 void* m61_malloc(size_t sz, const char* file, int line) {
     (void) file, (void) line;   // avoid uninitialized variable warnings
-    // Your code here.
-    return base_malloc(sz);
+    // return NULL is sz is 0
+    if (sz == 0) {
+        return NULL;
+    }
+    // create struct for holding metadata and value
+    m61_allocation *allocation;
+    memset(allocation, 255, sizeof(struct m61_allocation));
+    // fill struct for holding metadata and value
+    allocation->size = sz;
+    allocation->payload = base_malloc(sz + sizeof(size_t));
+    // return pointer to value
+    return allocation->size + sizeof(size_t);
 }
 
 
@@ -27,8 +37,7 @@ void* m61_malloc(size_t sz, const char* file, int line) {
 
 void m61_free(void *ptr, const char *file, int line) {
     (void) file, (void) line;   // avoid uninitialized variable warnings
-    // Your code here.
-    base_free(ptr);
+    base_free(ptr - sizeof(size_t));
 }
 
 
@@ -78,7 +87,7 @@ void m61_getstatistics(struct m61_statistics* stats) {
     // Stub: set all statistics to enormous numbers
     memset(stats, 255, sizeof(struct m61_statistics));
     // Your code here.
-    
+
 }
 
 
