@@ -40,7 +40,7 @@ struct m61_statistics {
 // m61_allocation
 // 		Structure tracking an allocation.
 struct m61_allocation {
-	size_t allocation_size;
+	size_t size;
 	void* payload;
 };
 

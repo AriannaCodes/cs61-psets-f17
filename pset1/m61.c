@@ -22,17 +22,18 @@ char* heap_max;
 ///    The allocation request was at location `file`:`line`.
 
 void* m61_malloc(size_t sz, const char* file, int line) {
-    (void) file, (void) line;   // avoid uninitialized variable warnings
+    // avoid uninitialized variable warnings
+    (void) file, (void) line;   
+    // create struct for holding metadata and value
+    struct m61_allocation* allocation;
+    allocation = base_malloc(sz + sizeof(size_t));
+    memset(allocation, 255, sizeof(struct m61_allocation));
     // return NULL is sz is 0
     if (sz == 0) {
         return NULL;
     }
-    // create struct for holding metadata and value
-    m61_allocation *allocation;
-    memset(allocation, 255, sizeof(struct m61_allocation));
     // fill struct for holding metadata and value
     allocation->size = sz;
-    allocation->payload = base_malloc(sz + sizeof(size_t));
     // ensure that base_malloc worked
     if (allocation->payload == NULL) {
         fail_num++;
@@ -42,10 +43,10 @@ void* m61_malloc(size_t sz, const char* file, int line) {
         malloc_num++;
         malloc_size += sz;
         // update statistics
-        if (heap_min == NULL || allocation->payload < heap_min) {
+        if (heap_min == NULL || (char*) allocation->payload < heap_min) {
             heap_min = allocation->payload;
         }
-        if (heap_max == NULL || allocation->payload < heap_max) {
+        if (heap_max == NULL || (char*) allocation->payload < heap_max) {
             heap_max = allocation->payload;
         }
     }
@@ -63,7 +64,7 @@ void* m61_malloc(size_t sz, const char* file, int line) {
 void m61_free(void *ptr, const char *file, int line) {
     (void) file, (void) line;   // avoid uninitialized variable warnings
     // get size of memory
-    unsigned long long size = &(ptr - sizeof(size_t));
+    unsigned long long size = *((unsigned long long*) ptr - sizeof(size_t));
     // call base_free
     base_free(ptr - sizeof(size_t));
     // update statistics
