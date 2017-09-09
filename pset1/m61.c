@@ -32,7 +32,7 @@ void* m61_malloc(size_t sz, const char* file, int line) {
     struct m61_allocation* allocation;
     allocation = base_malloc(sizeof(size_t) + sz);
     // ensure that base_malloc worked; if it didn't, fail
-    if (allocation == NULL) {
+    if (allocation == NULL || malloc_size + sz < malloc_size) {
         fail_num++;
         fail_size += sz;
         return NULL;
@@ -53,6 +53,7 @@ void* m61_malloc(size_t sz, const char* file, int line) {
         }
     }
     // return pointer to value
+    //printf("malloc\n");
     //m61_printstatistics();
     //printf("---\n");
     return allocation + sizeof(size_t);
@@ -80,6 +81,7 @@ void m61_free(void *ptr, const char *file, int line) {
     free_num++;
     //printf("size is %llu \n", size);
     free_size += size;
+    //printf("free\n");
     //m61_printstatistics();
     //printf("---\n");
     return;
