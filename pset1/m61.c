@@ -26,8 +26,7 @@ void* m61_malloc(size_t sz, const char* file, int line) {
     (void) file, (void) line;   
     // create struct for holding metadata and value
     struct m61_allocation* allocation;
-    allocation = base_malloc(sz + sizeof(size_t));
-    memset(allocation, 255, sizeof(struct m61_allocation));
+    allocation = base_malloc(sizeof(size_t) + sz);
     // return NULL is sz is 0
     if (sz == 0) {
         return NULL;
@@ -35,7 +34,7 @@ void* m61_malloc(size_t sz, const char* file, int line) {
     // fill struct for holding metadata and value
     allocation->size = sz;
     // ensure that base_malloc worked
-    if (allocation->payload == NULL) {
+    if (allocation == NULL) {
         fail_num++;
         fail_size += sz;
     }
@@ -51,7 +50,7 @@ void* m61_malloc(size_t sz, const char* file, int line) {
         }
     }
     // return pointer to value
-    return allocation->payload + sizeof(size_t);
+    return allocation + sizeof(size_t);
 }
 
 
@@ -64,7 +63,7 @@ void* m61_malloc(size_t sz, const char* file, int line) {
 void m61_free(void *ptr, const char *file, int line) {
     (void) file, (void) line;   // avoid uninitialized variable warnings
     // get size of memory
-    unsigned long long size = *((unsigned long long*) ptr - sizeof(size_t));
+    unsigned long long size = *((unsigned long long *)ptr - sizeof(size_t));
     // call base_free
     base_free(ptr - sizeof(size_t));
     // update statistics
