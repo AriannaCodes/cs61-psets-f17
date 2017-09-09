@@ -12,8 +12,8 @@ unsigned long long free_num = 0;
 unsigned long long free_size = 0;
 unsigned long long fail_num = 0;
 unsigned long long fail_size = 0;
-char* heap_min;
-char* heap_max;
+char* heap_min = NULL;
+char* heap_max = NULL;
 
 /// m61_malloc(sz, file, line)
 ///    Return a pointer to `sz` bytes of newly-allocated dynamic memory.
@@ -43,11 +43,11 @@ void* m61_malloc(size_t sz, const char* file, int line) {
         malloc_num++;
         malloc_size += sz;
         // update statistics
-        if (heap_min == NULL || (char*) allocation->payload < heap_min) {
-            heap_min = allocation->payload;
+        if (heap_min == NULL || (char*) allocation + sizeof(size_t) < heap_min) {
+            heap_min = (char *) (allocation + sizeof(size_t));
         }
-        if (heap_max == NULL || (char*) allocation->payload < heap_max) {
-            heap_max = allocation->payload;
+        if (heap_max == NULL || (char*) allocation + sizeof(size_t) + sz < heap_max) {
+            heap_max = (char *) (allocation + sizeof(size_t)) + sz;
         }
     }
     // return pointer to value
