@@ -43,10 +43,12 @@ void* m61_malloc(size_t sz, const char* file, int line) {
         malloc_num++;
         malloc_size += sz;
         // update statistics
-        if (heap_min == NULL || (char*) allocation + sizeof(size_t) < heap_min) {
+        if (heap_min == NULL || (char*) (allocation + sizeof(size_t)) < heap_min) {
+            //printf("setting heap min\n");
             heap_min = (char *) (allocation + sizeof(size_t));
         }
-        if (heap_max == NULL || (char*) allocation + sizeof(size_t) + sz < heap_max) {
+        if (heap_max == NULL || (char*) (allocation + sizeof(size_t) + sz) > heap_max) {
+            //printf("setting heap max\n");
             heap_max = (char *) (allocation + sizeof(size_t)) + sz;
         }
     }
