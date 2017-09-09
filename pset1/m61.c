@@ -14,6 +14,7 @@ unsigned long long fail_num = 0;
 unsigned long long fail_size = 0;
 char* heap_min = NULL;
 char* heap_max = NULL;
+struct m61_node* allocated_pointers = NULL;
 
 /// m61_malloc(sz, file, line)
 ///    Return a pointer to `sz` bytes of newly-allocated dynamic memory.
@@ -51,6 +52,11 @@ void* m61_malloc(size_t sz, const char* file, int line) {
             //printf("setting heap max\n");
             heap_max = (char *) (allocation + sizeof(size_t)) + sz;
         }
+        // add to linked list of pointers
+        struct m61_node* next = base_malloc(sizeof(struct m61_node));
+        next->ptr = allocation + sizeof(size_t);
+        next->next = allocated_pointers;
+        allocated_pointers = next;
     }
     // return pointer to value
     //printf("malloc\n");
@@ -70,6 +76,20 @@ void m61_free(void *ptr, const char *file, int line) {
     (void) file, (void) line;   // avoid uninitialized variable warnings
     // free null
     if (ptr == NULL) {
+        return;
+    }
+    // see if we are in linked list
+    int found = 0;
+    struct m61_node* itr = allocated_pointers;
+    while (itr != NULL) {
+        if (itr->ptr == ptr) {
+            found = 1;
+        }
+        itr = itr->next;
+    }
+    // if we are trying to free unallocated memory, print an error and return
+    if (!found) {
+        printf("MEMORY BUG: invalid free of pointer %p, not in heap\n", ptr);
         return;
     }
     // get size of memory
