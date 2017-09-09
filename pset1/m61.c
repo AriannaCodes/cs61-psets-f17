@@ -24,21 +24,22 @@ char* heap_max;
 void* m61_malloc(size_t sz, const char* file, int line) {
     // avoid uninitialized variable warnings
     (void) file, (void) line;   
-    // create struct for holding metadata and value
-    struct m61_allocation* allocation;
-    allocation = base_malloc(sizeof(size_t) + sz);
     // return NULL is sz is 0
     if (sz == 0) {
         return NULL;
     }
-    // fill struct for holding metadata and value
-    allocation->size = sz;
-    // ensure that base_malloc worked
+    // create struct for holding metadata and value
+    struct m61_allocation* allocation;
+    allocation = base_malloc(sizeof(size_t) + sz);
+    // ensure that base_malloc worked; if it didn't, fail
     if (allocation == NULL) {
         fail_num++;
         fail_size += sz;
+        return NULL;
     }
     else {
+        // fill struct for holding metadata and value
+        allocation->size = sz;
         malloc_num++;
         malloc_size += sz;
         // update statistics
