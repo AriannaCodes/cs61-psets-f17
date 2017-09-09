@@ -51,6 +51,8 @@ void* m61_malloc(size_t sz, const char* file, int line) {
         }
     }
     // return pointer to value
+    //m61_printstatistics();
+    //printf("---\n");
     return allocation + sizeof(size_t);
 }
 
@@ -63,13 +65,22 @@ void* m61_malloc(size_t sz, const char* file, int line) {
 
 void m61_free(void *ptr, const char *file, int line) {
     (void) file, (void) line;   // avoid uninitialized variable warnings
+    // free null
+    if (ptr == NULL) {
+        return;
+    }
     // get size of memory
-    unsigned long long size = *((unsigned long long *)ptr - sizeof(size_t));
+    unsigned long long* size_loc = (ptr - 128);
+    unsigned long long size = *size_loc;
     // call base_free
     base_free(ptr - sizeof(size_t));
     // update statistics
     free_num++;
-    free_size -= size;
+    //printf("size is %llu \n", size);
+    free_size += size;
+    //m61_printstatistics();
+    //printf("---\n");
+    return;
 }
 
 
