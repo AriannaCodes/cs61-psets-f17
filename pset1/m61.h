@@ -37,18 +37,18 @@ struct m61_statistics {
     char* heap_max;                     // largest allocated addr
 };
 
-/// linked list node
-///     Structure for tracking allocated pointers.
-struct m61_node {
-    char* ptr;
-    struct m61_node* next;
-};
-
 /// m61_allocation
 /// 	Structure tracking an allocation.
 struct m61_allocation {
 	size_t size;
 	void* payload;
+};
+
+/// m61_node
+///     Structure for tracking allocated pointers.
+struct m61_node {
+    struct m61_allocation* ptr;
+    struct m61_node* next;
 };
 
 /// m61_getstatistics(stats)

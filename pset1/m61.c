@@ -56,6 +56,7 @@ void* m61_malloc(size_t sz, const char* file, int line) {
         struct m61_node* next = base_malloc(sizeof(struct m61_node));
         next->ptr = allocation + sizeof(size_t);
         next->next = allocated_pointers;
+        //printf("Added pointer %p \n", next->ptr);
         allocated_pointers = next;
     }
     // return pointer to value
@@ -78,18 +79,33 @@ void m61_free(void *ptr, const char *file, int line) {
     if (ptr == NULL) {
         return;
     }
-    // see if we are in linked list
+    // check to see if we are in the heap
+    if ((char*) ptr < heap_min || (char*) ptr > heap_max) {
+        printf("MEMORY BUG %s:%i: invalid free of pointer %p, not in heap\n", file, line, ptr);
+    }
+
+    // see if we are in the linked list
     int found = 0;
+    struct m61_node* last = NULL;
     struct m61_node* itr = allocated_pointers;
     while (itr != NULL) {
         if (itr->ptr == ptr) {
             found = 1;
+            if (last == NULL) {
+                allocated_pointers = itr->next;
+            }
+            else {
+                last->next = itr->next;
+            }
+            //printf("Removed pointer %p \n", ptr);
+            base_free(itr);
         }
+        last = itr;
         itr = itr->next;
     }
     // if we are trying to free unallocated memory, print an error and return
     if (!found) {
-        printf("MEMORY BUG: invalid free of pointer %p, not in heap\n", ptr);
+        printf("MEMORY BUG: %s:%i: invalid free of pointer %p, not allocated\n", file, line, ptr);
         return;
     }
     // get size of memory
